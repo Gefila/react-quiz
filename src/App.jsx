@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer } from "react";
 import Header from "./components/Header";
 import Main from "./components/Main";
 import Loader from "./components/Loader";
@@ -6,6 +6,7 @@ import Error from "./components/Error";
 import StartScreen from "./components/StartScreen";
 import Question from "./components/Question";
 import NextButton from "./components/NextButton";
+import Progress from "./components/Progress";
 
 const initialState = {
 	questions: [],
@@ -24,6 +25,10 @@ function App() {
 	);
 
 	const numQuestions = questions.length;
+	const maxPossiblePoints = questions.reduce(
+		(prev, cur) => prev + cur.points,
+		0
+	);
 
 	useEffect(() => {
 		fetch("http://localhost:8000/questions")
@@ -72,12 +77,19 @@ function App() {
 				)}
 				{status === "active" && (
 					<>
+						<Progress
+							answer={answer}
+							index={index}
+							maxPossiblePoints={maxPossiblePoints}
+							points={points}
+							numQuestions={numQuestions}
+						/>
 						<Question
 							question={questions[index]}
 							dispatch={dispatch}
 							answer={answer}
 						/>
-						<NextButton dispatch={dispatch} answer={answer}/>
+						<NextButton dispatch={dispatch} answer={answer} />
 					</>
 				)}
 			</Main>
