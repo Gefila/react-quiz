@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import Header from "./components/Header";
 import Main from "./components/Main";
 import Loader from "./components/Loader";
@@ -11,11 +11,16 @@ const initialState = {
 
 	// loading, error, ready, active, finished
 	status: "loading",
-	index: 0
+	index: 0,
+	answer: null,
+	points: 0,
 };
 
 function App() {
-	const [{ questions, status, index }, dispatch] = useReducer(reducer, initialState);
+	const [{ questions, status, index, answer, points }, dispatch] = useReducer(
+		reducer,
+		initialState
+	);
 
 	const numQuestions = questions.length;
 
@@ -33,7 +38,18 @@ function App() {
 			case "dataFailed":
 				return { ...state, status: "error" };
 			case "start":
-				return {...state, status: 'active'}
+				return { ...state, status: "active" };
+			case "newAnswer": {
+				const questions = state.questions.at(state.index);
+				return {
+					...state,
+					answer: action.payload,
+					points:
+						action.payload === questions.correctOption
+							? state.points + questions.points
+							: state.points,
+				};
+			}
 			default:
 				throw new Error("Action unknown");
 		}
@@ -51,7 +67,13 @@ function App() {
 						dispatch={dispatch}
 					/>
 				)}
-				{status === "active" && <Question question={questions[index]}/>}
+				{status === "active" && (
+					<Question
+						question={questions[index]}
+						dispatch={dispatch}
+						answer={answer}
+					/>
+				)}
 			</Main>
 		</div>
 	);
